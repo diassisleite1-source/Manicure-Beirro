@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#C88A7E">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./icons/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <title>Estúdio BellaPés & Mãos | Manicure, Pedicure & Calista</title>
     
     <!-- Tailwind CSS via CDN -->
@@ -112,6 +119,9 @@
                     <i class="fa-solid fa-lock text-xs"></i> Painel do Profissional
                 </button>
             </nav>
+            <button id="install-app-btn" type="button" class="ml-auto md:ml-3 inline-flex items-center gap-2 rounded-xl bg-sage px-3 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-sage-dark transition-colors">
+                <i class="fa-solid fa-download"></i> <span>Instalar aplicativo</span>
+            </button>
         </div>
     </header>
 
@@ -1603,5 +1613,48 @@
         document.addEventListener('DOMContentLoaded', initApp);
 
     </script>
+
+    <script>
+        let deferredInstallPrompt = null;
+        const installButton = document.getElementById('install-app-btn');
+
+        window.addEventListener('beforeinstallprompt', event => {
+            event.preventDefault();
+            deferredInstallPrompt = event;
+            installButton.classList.remove('hidden');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredInstallPrompt = null;
+            installButton.classList.add('hidden');
+            if (typeof showToast === 'function') showToast('Aplicativo instalado com sucesso!', 'success');
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                const choice = await deferredInstallPrompt.userChoice;
+                deferredInstallPrompt = null;
+                if (choice && choice.outcome === 'accepted') installButton.classList.add('hidden');
+                return;
+            }
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                alert('O BellaPés & Mãos já está instalado no seu aparelho.');
+            } else {
+                alert('Para instalar: no Chrome do Android, toque nos três pontinhos (⋮) e escolha "Instalar aplicativo" ou "Adicionar à tela inicial". Se a opção não aparecer, abra este site pelo endereço HTTPS.');
+            }
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(error => console.error('Falha ao registrar o aplicativo:', error));
+            });
+        }
+
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            installButton.classList.add('hidden');
+        }
+    </script>
+
 </body>
 </html>
