@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estúdio BellaPés & Mãos | Manicure, Pedicure & Calista</title>
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Playfair Display (Títulos) & Plus Jakarta Sans (Textos) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Configuração Personalizada do Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FAF9F6',
+                        terracotta: {
+                            DEFAULT: '#C88A7E',
+                            dark: '#B07266',
+                            light: '#F7ECEA'
+                        },
+                        gold: '#D4A373',
+                        sage: {
+                            DEFAULT: '#4A7C6F',
+                            dark: '#386156',
+                            light: '#E8F1EE'
+                        },
+                        graphite: '#2B2D42'
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Estilos base e refinamentos visuais */
+        body {
+            background-color: #FAF9F6;
+            color: #2B2D42;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1, h2, h3, .font-serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Animações suaves para troca de abas e modais */
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar discreta */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF9F6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4A373;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-24 md:pb-12">
+
+    <!-- =====================================================================
+         CABEÇALHO SUPERIOR (DESKTOP & MOBILE)
+         ===================================================================== -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-18 py-3 flex items-center justify-between">
+            <!-- Identidade do Estúdio -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('agendar')">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-terracotta to-gold flex items-center justify-center text-white shadow-sm">
+                    <i class="fa-solid fa-spa text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold text-graphite leading-tight tracking-tight">BellaPés & Mãos</h1>
+                    <p class="text-[11px] sm:text-xs text-sage font-semibold uppercase tracking-wider">Manicure • Pedicure • Calista</p>
+                </div>
+            </div>
+
+            <!-- Navegação Desktop -->
+            <nav class="hidden md:flex items-center gap-2 bg-cream p-1.5 rounded-2xl border border-stone-200/70">
+                <button onclick="switchTab('agendar')" id="nav-desk-agendar" class="nav-desk-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+                    <i class="fa-regular fa-calendar-plus"></i> Agendar
+                </button>
+                <button onclick="switchTab('meus')" id="nav-desk-meus" class="nav-desk-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+                    <i class="fa-regular fa-clock"></i> Meus Agendamentos
+                </button>
+                <button onclick="switchTab('admin')" id="nav-desk-admin" class="nav-desk-btn px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-lock text-xs"></i> Painel do Profissional
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- =====================================================================
+         CONTEÚDO PRINCIPAL
+         ===================================================================== -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-6">
+
+        <!-- =================================================================
+             TELA 1: AGENDAR (ÁREA DO CLIENTE)
+             ================================================================= -->
+        <section id="view-agendar" class="fade-in space-y-8">
+            <!-- Banner de Boas-vindas -->
+            <div class="bg-gradient-to-r from-sage-light via-white to-terracotta-light rounded-3xl p-6 sm:p-8 border border-stone-200/60 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="space-y-1.5 max-w-xl">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white text-sage shadow-xs">
+                        <i class="fa-solid fa-heart-pulse"></i> Cuidado Estético & Saúde dos Pés
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-graphite">Realce sua beleza e cuide do bem-estar dos seus pés</h2>
+                    <p class="text-sm text-stone-600">Escolha um ou mais serviços abaixo, selecione o melhor horário e garanta seu atendimento personalizado.</p>
+                </div>
+                <div class="hidden sm:flex items-center gap-3 bg-white/80 px-4 py-3 rounded-2xl border border-stone-100 text-xs text-stone-600">
+                    <i class="fa-solid fa-shield-virus text-sage text-xl"></i>
+                    <div>
+                        <p class="font-bold text-graphite">100% Esterilizado</p>
+                        <p>Materiais em autoclave</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passo 1: Catálogo de Serviços -->
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-terracotta">Passo 1 de 3</span>
+                        <h3 class="text-xl font-bold text-graphite">Escolha os Serviços</h3>
+                    </div>
+
+                    <!-- Filtro de Categorias -->
+                    <div class="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-stone-200/80 self-start">
+                        <button onclick="filterCategory('todos')" id="cat-btn-todos" class="cat-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all bg-graphite text-white">
+                            Todos
+                        </button>
+                        <button onclick="filterCategory('maos')" id="cat-btn-maos" class="cat-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all text-stone-600 hover:bg-stone-100">
+                            <i class="fa-solid fa-hand-sparkles mr-1 text-terracotta"></i> Mãos (Manicure)
+                        </button>
+                        <button onclick="filterCategory('pes')" id="cat-btn-pes" class="cat-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all text-stone-600 hover:bg-stone-100">
+                            <i class="fa-solid fa-shoe-prints mr-1 text-sage"></i> Pés & Calista
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Grid de Cards de Serviços -->
+                <div id="services-catalog-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Renderizado dinamicamente via JS -->
+                </div>
+            </div>
+
+            <!-- Passo 2: Data e Horário -->
+            <div id="step-datetime" class="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200/80 shadow-xs space-y-6">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-terracotta">Passo 2 de 3</span>
+                    <h3 class="text-xl font-bold text-graphite">Data e Horário</h3>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Seletor de Data -->
+                    <div class="md:col-span-5 space-y-3">
+                        <label class="block text-sm font-semibold text-graphite">Selecione o dia:</label>
+                        <input type="date" id="booking-date" onchange="handleDateChange()" class="w-full px-4 py-3 rounded-2xl border border-stone-300 bg-cream text-graphite font-medium focus:outline-none focus:ring-2 focus:ring-terracotta">
+                        
+                        <!-- Atalhos rápidos -->
+                        <div class="flex gap-2">
+                            <button type="button" onclick="setQuickDate(0)" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-sage-light text-sage hover:bg-sage hover:text-white transition-colors">
+                                Hoje
+                            </button>
+                            <button type="button" onclick="setQuickDate(1)" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-terracotta-light text-terracotta-dark hover:bg-terracotta hover:text-white transition-colors">
+                                Amanhã
+                            </button>
+                        </div>
+                        <p id="selected-date-label" class="text-xs text-stone-500 font-medium pt-1"></p>
+                    </div>
+
+                    <!-- Grade de Horários -->
+                    <div class="md:col-span-7 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-sm font-semibold text-graphite">Horários disponíveis:</label>
+                            <span class="text-[11px] text-stone-400 flex items-center gap-2">
+                                <span class="inline-block w-2.5 h-2.5 rounded-full bg-stone-200"></span> Ocupado
+                                <span class="inline-block w-2.5 h-2.5 rounded-full bg-terracotta"></span> Selecionado
+                            </span>
+                        </div>
+                        
+                        <div id="time-slots-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+                            <!-- Renderizado via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passo 3: Dados do Cliente e Confirmação -->
+            <div id="step-client-info" class="bg-white rounded-3xl p-6 sm:p-7 border border-stone-200/80 shadow-xs space-y-5">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-terracotta">Passo 3 de 3</span>
+                    <h3 class="text-xl font-bold text-graphite">Seus Dados</h3>
+                </div>
+
+                <form id="booking-form" onsubmit="submitBooking(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="client-name" class="block text-sm font-semibold text-graphite mb-1.5">Nome Completo *</label>
+                            <div class="relative">
+                                <i class="fa-regular fa-user absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+                                <input type="text" id="client-name" required placeholder="Ex: Mariana Silva" class="w-full pl-11 pr-4 py-3 rounded-2xl border border-stone-300 bg-cream focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="client-phone" class="block text-sm font-semibold text-graphite mb-1.5">WhatsApp / Telefone *</label>
+                            <div class="relative">
+                                <i class="fa-brands fa-whatsapp absolute left-4 top-1/2 -translate-y-1/2 text-sage text-base"></i>
+                                <input type="tel" id="client-phone" required placeholder="(00) 00000-0000" maxlength="15" oninput="maskPhone(this)" class="w-full pl-11 pr-4 py-3 rounded-2xl border border-stone-300 bg-cream focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta text-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="client-notes" class="block text-sm font-semibold text-graphite mb-1.5">
+                            Observações Clínicas ou Preferências <span class="text-stone-400 font-normal">(Opcional)</span>
+                        </label>
+                        <textarea id="client-notes" rows="2" placeholder="Ex: Tenho um calo no pé direito, unha encravada no dedão, alergia a acetona..." class="w-full px-4 py-3 rounded-2xl border border-stone-300 bg-cream focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta text-sm"></textarea>
+                    </div>
+
+                    <!-- Resumo Final antes de confirmar -->
+                    <div id="booking-summary-box" class="bg-cream rounded-2xl p-4 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold text-stone-500 uppercase">Resumo do Atendimento</p>
+                            <p id="summary-services-text" class="text-sm font-bold text-graphite">Nenhum serviço selecionado</p>
+                            <p id="summary-datetime-text" class="text-xs text-sage font-semibold">Selecione data e horário</p>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <p class="text-xs text-stone-500">Valor Total Estimado</p>
+                            <p id="summary-total-price" class="text-2xl font-bold text-terracotta-dark">R$ 0,00</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-terracotta to-terracotta-dark hover:opacity-95 text-white font-bold text-base shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-check-circle"></i> Confirmar Agendamento
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Barra Flutuante de Resumo do Combo (Aparece ao selecionar serviços na tela Agendar) -->
+        <div id="floating-combo-bar" class="hidden fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-2xl bg-graphite text-white px-5 py-3.5 rounded-2xl shadow-xl z-30 flex items-center justify-between gap-4 border border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-terracotta flex items-center justify-center font-bold text-sm" id="combo-count-badge">0</div>
+                <div>
+                    <p class="text-xs text-stone-300" id="combo-duration-text">0 min estimados</p>
+                    <p class="text-sm font-bold" id="combo-price-text">Total: R$ 0,00</p>
+                </div>
+            </div>
+            <button onclick="scrollToDateTime()" class="px-4 py-2 rounded-xl bg-sage hover:bg-sage-dark text-white text-xs sm:text-sm font-semibold transition-colors flex items-center gap-1.5">
+                Escolher Horário <i class="fa-solid fa-arrow-down"></i>
+            </button>
+        </div>
+
+        <!-- =================================================================
+             TELA 2: MEUS AGENDAMENTOS (CONSULTA DO CLIENTE)
+             ================================================================= -->
+        <section id="view-meus" class="hidden fade-in space-y-6 max-w-2xl mx-auto">
+            <div class="text-center space-y-2 pt-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-terracotta-light text-terracotta-dark">
+                    <i class="fa-regular fa-calendar-check"></i> Área do Cliente
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-graphite">Meus Agendamentos</h2>
+                <p class="text-sm text-stone-600">Digite seu número de WhatsApp para consultar ou cancelar seus horários marcados.</p>
+            </div>
+
+            <!-- Formulário de Busca por Telefone -->
+            <div class="bg-white p-5 sm:p-6 rounded-3xl border border-stone-200/80 shadow-xs">
+                <form onsubmit="searchClientAppointments(event)" class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <i class="fa-brands fa-whatsapp absolute left-4 top-1/2 -translate-y-1/2 text-sage text-lg"></i>
+                        <input type="tel" id="search-client-phone" required placeholder="Digite seu WhatsApp: (00) 00000-0000" maxlength="15" oninput="maskPhone(this)" class="w-full pl-11 pr-4 py-3.5 rounded-2xl border border-stone-300 bg-cream focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage text-sm font-medium">
+                    </div>
+                    <button type="submit" class="px-6 py-3.5 rounded-2xl bg-sage hover:bg-sage-dark text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass"></i> Buscar Horários
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lista de Resultados do Cliente -->
+            <div id="client-appointments-results" class="space-y-4">
+                <div class="text-center py-10 text-stone-400 text-sm">
+                    <i class="fa-regular fa-folder-open text-3xl mb-2 block text-stone-300"></i>
+                    Informe seu WhatsApp acima para visualizar seus agendamentos.
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             TELA 3: PAINEL DO PROFISSIONAL (ÁREA DO DONO)
+             ================================================================= -->
+        <section id="view-admin" class="hidden fade-in space-y-6">
+            
+            <!-- Tela de Login do Profissional -->
+            <div id="admin-login-box" class="max-w-md mx-auto bg-white p-7 rounded-3xl border border-stone-200/80 shadow-sm text-center space-y-5 mt-6">
+                <div class="w-14 h-14 rounded-2xl bg-sage-light text-sage mx-auto flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-graphite">Acesso Restrito</h2>
+                    <p class="text-xs text-stone-500 mt-1">Área exclusiva para gestão do estúdio e agenda.</p>
+                </div>
+                <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-stone-500 mb-1.5">Senha do Administrador</label>
+                        <input type="password" id="admin-password-input" required placeholder="Digite a senha (padrão: 1234)" class="w-full px-4 py-3 rounded-2xl border border-stone-300 bg-cream focus:bg-white focus:outline-none focus:ring-2 focus:ring-sage text-center tracking-widest font-bold">
+                    </div>
+                    <button type="submit" class="w-full py-3.5 rounded-2xl bg-graphite hover:bg-stone-800 text-white font-semibold text-sm transition-colors">
+                        Entrar no Painel
+                    </button>
+                </form>
+            </div>
+
+            <!-- Conteúdo Autenticado do Painel do Profissional -->
+            <div id="admin-dashboard-content" class="hidden space-y-6">
+                <!-- Cabeçalho do Painel -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-stone-200/80">
+                    <div>
+                        <span class="text-xs font-bold text-sage uppercase tracking-wider">Gestão do Estúdio</span>
+                        <h2 class="text-2xl font-bold text-graphite">Painel Administrativo</h2>
+                    </div>
+                    <button onclick="logoutAdmin()" class="self-start sm:self-auto px-4 py-2 rounded-xl border border-stone-200 text-stone-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-xs font-semibold transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sair do Painel
+                    </button>
+                </div>
+
+                <!-- Cards de Métricas (Dashboard Resumido) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-3xl border border-stone-200/80 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-terracotta-light text-terracotta-dark flex items-center justify-center text-xl">
+                            <i class="fa-regular fa-calendar"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-stone-500">Agendamentos Hoje</p>
+                            <p id="stat-today-count" class="text-2xl font-bold text-graphite">0</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-3xl border border-stone-200/80 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-sage-light text-sage flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-stone-500">Faturamento Previsto (Hoje)</p>
+                            <p id="stat-today-revenue" class="text-2xl font-bold text-sage">R$ 0,00</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-3xl border border-stone-200/80 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-check-double"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-stone-500">Concluídos (Total)</p>
+                            <p id="stat-completed-count" class="text-2xl font-bold text-graphite">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-navegação Interna do Painel -->
+                <div class="flex overflow-x-auto gap-2 bg-white p-1.5 rounded-2xl border border-stone-200/80">
+                    <button onclick="switchAdminSubtab('agenda')" id="subtab-btn-agenda" class="admin-subtab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-graphite text-white transition-all">
+                        <i class="fa-regular fa-calendar-days mr-1.5"></i> Agenda Completa
+                    </button>
+                    <button onclick="switchAdminSubtab('servicos')" id="subtab-btn-servicos" class="admin-subtab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap text-stone-600 hover:bg-stone-100 transition-all">
+                        <i class="fa-solid fa-list-check mr-1.5"></i> Serviços (Catálogo)
+                    </button>
+                    <button onclick="switchAdminSubtab('bloqueios')" id="subtab-btn-bloqueios" class="admin-subtab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap text-stone-600 hover:bg-stone-100 transition-all">
+                        <i class="fa-solid fa-ban mr-1.5"></i> Bloqueios de Agenda
+                    </button>
+                </div>
+
+                <!-- SUB-ABA 1: AGENDA COMPLETA -->
+                <div id="admin-sub-agenda" class="space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-stone-200/80">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="setAdminAgendaFilter('today')" id="filter-ag-today" class="ag-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-sage text-white">Hoje</button>
+                            <button onclick="setAdminAgendaFilter('tomorrow')" id="filter-ag-tomorrow" class="ag-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-cream text-stone-600 hover:bg-stone-200">Amanhã</button>
+                            <button onclick="setAdminAgendaFilter('all')" id="filter-ag-all" class="ag-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-cream text-stone-600 hover:bg-stone-200">Todos</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-semibold text-stone-500">Data:</label>
+                            <input type="date" id="admin-filter-date" onchange="setAdminAgendaFilter('custom')" class="px-3 py-1.5 rounded-xl border border-stone-300 text-xs bg-cream">
+                        </div>
+                    </div>
+
+                    <div id="admin-appointments-list" class="space-y-3">
+                        <!-- Lista de agendamentos renderizada via JS -->
+                    </div>
+                </div>
+
+                <!-- SUB-ABA 2: GERENCIADOR DE SERVIÇOS (CRUD) -->
+                <div id="admin-sub-servicos" class="hidden space-y-5">
+                    <!-- Formulário Adicionar / Editar Serviço -->
+                    <div class="bg-white p-5 sm:p-6 rounded-3xl border border-stone-200/80 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 id="service-form-title" class="text-lg font-bold text-graphite">Adicionar Novo Serviço</h3>
+                            <button type="button" id="cancel-edit-service-btn" onclick="resetServiceForm()" class="hidden text-xs text-red-600 font-semibold hover:underline">Cancelar Edição</button>
+                        </div>
+                        
+                        <form onsubmit="saveServiceForm(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+                            <input type="hidden" id="edit-service-id">
+                            
+                            <div class="sm:col-span-5">
+                                <label class="block text-xs font-semibold text-stone-600 mb-1">Nome do Serviço *</label>
+                                <input type="text" id="srv-name" required placeholder="Ex: Spa Podal Completo" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-cream text-sm">
+                            </div>
+
+                            <div class="sm:col-span-3">
+                                <label class="block text-xs font-semibold text-stone-600 mb-1">Categoria *</label>
+                                <select id="srv-category" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-cream text-sm">
+                                    <option value="maos">Mãos (Manicure)</option>
+                                    <option value="pes">Pés & Calista</option>
+                                </select>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-stone-600 mb-1">Preço (R$) *</label>
+                                <input type="number" id="srv-price" required step="0.01" min="1" placeholder="50.00" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-cream text-sm">
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-stone-600 mb-1">Duração (min) *</label>
+                                <input type="number" id="srv-duration" required step="5" min="10" placeholder="45" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-cream text-sm">
+                            </div>
+
+                            <div class="sm:col-span-9">
+                                <label class="block text-xs font-semibold text-stone-600 mb-1">Descrição Breve *</label>
+                                <input type="text" id="srv-desc" required placeholder="Descreva os benefícios e etapas do procedimento..." class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-cream text-sm">
+                            </div>
+
+                            <div class="sm:col-span-3 flex items-end">
+                                <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-sage hover:bg-sage-dark text-white font-semibold text-sm transition-colors">
+                                    <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Serviço
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Lista de Serviços Cadastrados -->
+                    <div id="admin-services-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <!-- Renderizado via JS -->
+                    </div>
+                </div>
+
+                <!-- SUB-ABA 3: BLOQUEIOS DE AGENDA -->
+                <div id="admin-sub-bloqueios" class="hidden space-y-5">
+                    <div class="bg-white p-5 sm:p-6 rounded-3xl border border-stone-200/80 space-y-4">
+                        <h3 class="text-lg font-bold text-graphite">Bloquear Data ou Horário Específico</h3>
+                        <p class="text-xs text-stone-500">Use esta função para folgas, feriados ou intervalos em que não haverá atendimento.</p>
+                        
+                        <form onsubmit="addScheduleBlock(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+                            <div class="sm:col-span-4">
+                                <label class="block text-xs font-semibold text-stone-600 mb-1">Data *</label>
+                                <input type="date" id="block-date" required class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-cream text-sm">
+                            </div>
+
+                            <div class="sm:col-span-4">
+                                <label class="block text-xs font-semibold text-stone-600 mb-1">Horário *</label>
+                                <select id="block-time" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 bg-cream text-sm">
+                                    <option value="ALL">Dia Inteiro (Folga / Fechado)</option>
+                                    <option value="08:00">08:00</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="13:00">13:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="18:00">18:00</option>
+                                </select>
+                            </div>
+
+                            <div class="sm:col-span-4 flex items-end">
+                                <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-terracotta hover:bg-terracotta-dark text-white font-semibold text-sm transition-colors">
+                                    <i class="fa-solid fa-lock mr-1"></i> Aplicar Bloqueio
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-3xl border border-stone-200/80 space-y-3">
+                        <h4 class="text-sm font-bold text-graphite">Bloqueios Ativos</h4>
+                        <div id="admin-blocks-list" class="space-y-2">
+                            <!-- Renderizado via JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =====================================================================
+         BARRA DE NAVEGAÇÃO INFERIOR (MOBILE-FIRST)
+         ===================================================================== -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 px-2 py-2 flex justify-around items-center z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+        <button onclick="switchTab('agendar')" id="nav-mob-agendar" class="nav-mob-btn flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-terracotta-dark font-bold text-[11px]">
+            <i class="fa-regular fa-calendar-plus text-lg"></i>
+            <span>Agendar</span>
+        </button>
+        <button onclick="switchTab('meus')" id="nav-mob-meus" class="nav-mob-btn flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-stone-400 font-medium text-[11px]">
+            <i class="fa-regular fa-clock text-lg"></i>
+            <span>Meus Horários</span>
+        </button>
+        <button onclick="switchTab('admin')" id="nav-mob-admin" class="nav-mob-btn flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-stone-400 font-medium text-[11px]">
+            <i class="fa-solid fa-user-shield text-lg"></i>
+            <span>Profissional</span>
+        </button>
+    </nav>
+
+    <!-- =====================================================================
+         MODAL DE COMPROVANTE E ENVIO WHATSAPP (SUCESSO DO AGENDAMENTO)
+         ===================================================================== -->
+    <div id="success-modal" class="hidden fixed inset-0 bg-graphite/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 fade-in relative">
+            <button onclick="closeSuccessModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-stone-100 text-stone-500 hover:bg-stone-200 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 rounded-full bg-sage-light text-sage mx-auto flex items-center justify-center text-3xl">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-graphite">Agendamento Confirmado!</h3>
+                <p class="text-xs text-stone-500">Seu horário já está reservado em nosso sistema.</p>
+            </div>
+
+            <!-- Comprovante Visual -->
+            <div id="receipt-details" class="bg-cream rounded-2xl p-4 border border-dashed border-stone-300 space-y-2.5 text-sm">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <div class="space-y-2.5 pt-1">
+                <a id="whatsapp-share-link" href="#" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 px-5 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 transition-colors">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Enviar Comprovante no WhatsApp
+                </a>
+                <button onclick="closeSuccessModal()" class="w-full py-3 rounded-2xl bg-stone-100 hover:bg-stone-200 text-graphite font-semibold text-xs transition-colors">
+                    Concluir e Voltar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL DE CONFIRMAÇÃO GENÉRICO (SUBSTITUI confirm() NATIVO)
+         ===================================================================== -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-graphite/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 fade-in text-center">
+            <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-500 mx-auto flex items-center justify-center text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="confirm-modal-title" class="text-lg font-bold text-graphite">Confirmar Ação</h3>
+            <p id="confirm-modal-desc" class="text-xs text-stone-600">Tem certeza que deseja continuar?</p>
+            <div class="flex gap-2.5 pt-2">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-stone-100 text-stone-700 font-semibold text-xs hover:bg-stone-200">Voltar</button>
+                <button id="confirm-modal-yes-btn" class="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-xs hover:bg-red-600">Sim, Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         CONTAINER DE NOTIFICAÇÕES TOAST
+         ===================================================================== -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-xs w-full pointer-events-none"></div>
+
+    <!-- =====================================================================
+         JAVASCRIPT INTEGRADO (LÓGICA, ESTADO E LOCALSTORAGE)
+         ===================================================================== -->
+    <script>
+        /**
+         * ===================================================================
+         * CONFIGURAÇÕES PRINCIPAIS DO ESTÚDIO (EDITE AQUI FACILMENTE)
+         * ===================================================================
+         */
+        const STUDIO_CONFIG = {
+            name: "Estúdio BellaPés & Mãos",
+            // Número de WhatsApp do Estúdio (apenas números, com código do país 55 + DDD)
+            whatsappNumber: "5584999999999", 
+            // Senha de acesso ao Painel do Profissional
+            adminPassword: "1234",
+            // Horários padrão de funcionamento
+            workingHours: [
+                "08:00", "09:00", "10:00", "11:00",
+                "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"
+            ]
+        };
+
+        /**
+         * Chaves de armazenamento no localStorage
+         */
+        const STORAGE_KEYS = {
+            SERVICES: 'bellapes_services_v1',
+            APPOINTMENTS: 'bellapes_appointments_v1',
+            BLOCKS: 'bellapes_blocks_v1',
+            ADMIN_AUTH: 'bellapes_admin_logged_v1'
+        };
+
+        /**
+         * Estado global da aplicação em memória
+         */
+        let state = {
+            services: [],
+            appointments: [],
+            blocks: [],
+            selectedServiceIds: [],
+            selectedDate: '',
+            selectedTime: '',
+            currentCategoryFilter: 'todos',
+            adminAgendaFilter: 'today',
+            isAdminLogged: false
+        };
+
+        /**
+         * ===================================================================
+         * UTILITÁRIOS DE DATA E FORMATAÇÃO
+         * ===================================================================
+         */
+        function getTodayStr(offsetDays = 0) {
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDays);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateBR(isoDateStr) {
+            if (!isoDateStr) return '';
+            const [y, m, d] = isoDateStr.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function formatCurrency(val) {
+            return Number(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function maskPhone(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.slice(0, 11);
+            if (v.length > 6) {
+                input.value = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+            } else if (v.length > 2) {
+                input.value = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+            } else if (v.length > 0) {
+                input.value = `(${v}`;
+            }
+        }
+
+        function cleanPhone(phoneStr) {
+            return (phoneStr || '').replace(/\D/g, '');
+        }
+
+        /**
+         * ===================================================================
+         * INICIALIZAÇÃO E DADOS PRÉ-POPULADOS (SEED)
+         * ===================================================================
+         */
+        function initData() {
+            const savedServices = localStorage.getItem(STORAGE_KEYS.SERVICES);
+            const savedAppointments = localStorage.getItem(STORAGE_KEYS.APPOINTMENTS);
+            const savedBlocks = localStorage.getItem(STORAGE_KEYS.BLOCKS);
+
+            if (savedServices) {
+                state.services = JSON.parse(savedServices);
+            } else {
+                // Catálogo inicial rico (Mãos + Pés & Calista)
+                state.services = [
+                    {
+                        id: 'srv-1',
+                        name: 'Manicure Tradicional',
+                        category: 'maos',
+                        price: 35.00,
+                        duration: 45,
+                        desc: 'Cutilagem detalhada, lixamento técnico, hidratação e esmaltação tradicional com brilho intenso.',
+                        active: true
+                    },
+                    {
+                        id: 'srv-2',
+                        name: 'Esmaltação em Gel',
+                        category: 'maos',
+                        price: 65.00,
+                        duration: 60,
+                        desc: 'Durabilidade de até 20 dias sem descascar, secagem imediata em cabine LED e acabamento impecável.',
+                        active: true
+                    },
+                    {
+                        id: 'srv-3',
+                        name: 'Alongamento de Unhas',
+                        category: 'maos',
+                        price: 130.00,
+                        duration: 120,
+                        desc: 'Alongamento natural e resistente (fibra de vidro ou gel moldado) com curvatura personalizada.',
+                        active: true
+                    },
+                    {
+                        id: 'srv-4',
+                        name: 'Spa das Mãos',
+                        category: 'maos',
+                        price: 45.00,
+                        duration: 40,
+                        desc: 'Esfoliação suave, máscara nutritiva de colágeno, massagem relaxante e revitalização.',
+                        active: true
+                    },
+                    {
+                        id: 'srv-5',
+                        name: 'Pedicure Tradicional',
+                        category: 'pes',
+                        price: 40.00,
+                        duration: 50,
+                        desc: 'Corte técnico das unhas, cutilagem, lixamento plantar leve e esmaltação.',
+                        active: true
+                    },
+                    {
+                        id: 'srv-6',
+                        name: 'Remoção de Calos e Calosidades (Calista)',
+                        category: 'pes',
+                        price: 85.00,
+                        duration: 60,
+                        desc: 'Procedimento especializado de calista para desbaste seguro de calos, fissuras e hiperqueratose plantar.',
+                        active: true
+                    },
+                    {
+                        id: 'srv-7',
+                        name: 'Tratamento de Unhas Encravadas',
+                        category: 'pes',
+                        price: 95.00,
+                        duration: 60,
+                        desc: 'Alívio imediato da dor, limpeza profunda do sulco ungueal e curativo podológico.',
+                        active: true
+                    },
+                    {
+                        id: 'srv-8',
+                        name: 'Hidratação Profunda & Spa dos Pés',
+                        category: 'pes',
+                        price: 70.00,
+                        duration: 50,
+                        desc: 'Escalda-pés relaxante com sais, esfoliação plantar, parafina fria e reflexologia básica.',
+                        active: true
+                    }
+                ];
+                saveServicesToStorage();
+            }
+
+            if (savedAppointments) {
+                state.appointments = JSON.parse(savedAppointments);
+            } else {
+                // 2 Agendamentos de exemplo para hoje para demonstração imediata
+                const today = getTodayStr(0);
+                state.appointments = [
+                    {
+                        id: 'ag-demo-1',
+                        clientName: 'Camila Andrade',
+                        clientPhone: '(84) 99888-1122',
+                        date: today,
+                        time: '09:00',
+                        serviceIds: ['srv-1', 'srv-6'],
+                        servicesSnapshot: [
+                            { name: 'Manicure Tradicional', price: 35.00, duration: 45 },
+                            { name: 'Remoção de Calos e Calosidades (Calista)', price: 85.00, duration: 60 }
+                        ],
+                        totalPrice: 120.00,
+                        totalDuration: 105,
+                        notes: 'Calo plantar no pé direito próximo ao dedo mindinho.',
+                        status: 'Confirmado',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'ag-demo-2',
+                        clientName: 'Fernanda Costa',
+                        clientPhone: '(84) 99777-3344',
+                        date: today,
+                        time: '14:00',
+                        serviceIds: ['srv-2'],
+                        servicesSnapshot: [
+                            { name: 'Esmaltação em Gel', price: 65.00, duration: 60 }
+                        ],
+                        totalPrice: 65.00,
+                        totalDuration: 60,
+                        notes: 'Preferência por tons nude ou rosé.',
+                        status: 'Concluído',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                saveAppointmentsToStorage();
+            }
+
+            if (savedBlocks) {
+                state.blocks = JSON.parse(savedBlocks);
+            } else {
+                state.blocks = [];
+                saveBlocksToStorage();
+            }
+
+            // Verifica sessão do dono
+            if (sessionStorage.getItem(STORAGE_KEYS.ADMIN_AUTH) === 'true') {
+                state.isAdminLogged = true;
+            }
+        }
+
+        function saveServicesToStorage() {
+            localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(state.services));
+        }
+
+        function saveAppointmentsToStorage() {
+            localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(state.appointments));
+        }
+
+        function saveBlocksToStorage() {
+            localStorage.setItem(STORAGE_KEYS.BLOCKS, JSON.stringify(state.blocks));
+        }
+
+        /**
+         * ===================================================================
+         * NAVEGAÇÃO ENTRE ABAS PRINCIPAIS
+         * ===================================================================
+         */
+        function switchTab(tabName) {
+            // Oculta todas as views
+            ['agendar', 'meus', 'admin'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+
+            // Atualiza botões Desktop
+            document.querySelectorAll('.nav-desk-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-terracotta-dark', 'shadow-xs');
+                btn.classList.add('text-stone-600', 'hover:text-graphite');
+            });
+            const activeDesk = document.getElementById(`nav-desk-${tabName}`);
+            if (activeDesk) {
+                activeDesk.classList.add('bg-white', 'text-terracotta-dark', 'shadow-xs');
+                activeDesk.classList.remove('text-stone-600', 'hover:text-graphite');
+            }
+
+            // Atualiza botões Mobile
+            document.querySelectorAll('.nav-mob-btn').forEach(btn => {
+                btn.classList.remove('text-terracotta-dark', 'font-bold');
+                btn.classList.add('text-stone-400', 'font-medium');
+            });
+            const activeMob = document.getElementById(`nav-mob-${tabName}`);
+            if (activeMob) {
+                activeMob.classList.add('text-terracotta-dark', 'font-bold');
+                activeMob.classList.remove('text-stone-400', 'font-medium');
+            }
+
+            // Atualiza barra flutuante do combo
+            updateComboBarVisibility(tabName);
+
+            // Ações específicas ao abrir aba
+            if (tabName === 'agendar') {
+                renderCatalog();
+                renderTimeSlots();
+            } else if (tabName === 'admin') {
+                renderAdminView();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateComboBarVisibility(currentTab = 'agendar') {
+            const bar = document.getElementById('floating-combo-bar');
+            if (currentTab === 'agendar' && state.selectedServiceIds.length > 0) {
+                bar.classList.remove('hidden');
+            } else {
+                bar.classList.add('hidden');
+            }
+        }
+
+        /**
+         * ===================================================================
+         * ÁREA DO CLIENTE: CATÁLOGO DE SERVIÇOS E SELEÇÃO DE COMBO
+         * ===================================================================
+         */
+        function filterCategory(category) {
+            state.currentCategoryFilter = category;
+            
+            document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-graphite', 'text-white');
+                btn.classList.add('text-stone-600', 'hover:bg-stone-100');
+            });
+            const activeBtn = document.getElementById(`cat-btn-${category}`);
+            activeBtn.classList.add('bg-graphite', 'text-white');
+            activeBtn.classList.remove('text-stone-600', 'hover:bg-stone-100');
+
+            renderCatalog();
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById('services-catalog-grid');
+            const activeServices = state.services.filter(s => s.active);
+            
+            const filtered = state.currentCategoryFilter === 'todos'
+                ? activeServices
+                : activeServices.filter(s => s.category === state.currentCategoryFilter);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-8 text-stone-400 text-sm">Nenhum serviço disponível nesta categoria no momento.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(srv => {
+                const isSelected = state.selectedServiceIds.includes(srv.id);
+                const isFoot = srv.category === 'pes';
+                
+                const badgeClass = isFoot 
+                    ? 'bg-sage-light text-sage' 
+                    : 'bg-terracotta-light text-terracotta-dark';
+                const badgeLabel = isFoot ? 'Pés & Calista' : 'Mãos • Manicure';
+                const badgeIcon = isFoot ? 'fa-shoe-prints' : 'fa-hand-sparkles';
+
+                const cardBorder = isSelected 
+                    ? 'border-terracotta ring-2 ring-terracotta/30 bg-terracotta-light/20' 
+                    : 'border-stone-200/80 bg-white hover:border-stone-300';
+
+                return `
+                    <div onclick="toggleServiceSelection('${srv.id}')" class="rounded-3xl p-5 border transition-all cursor-pointer flex flex-col justify-between gap-4 select-none ${cardBorder}">
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeClass}">
+                                    <i class="fa-solid ${badgeIcon}"></i> ${badgeLabel}
+                                </span>
+                                <span class="text-xs font-semibold text-stone-400 flex items-center gap-1">
+                                    <i class="fa-regular fa-clock"></i> ${srv.duration} min
+                                </span>
+                            </div>
+                            <h4 class="text-base sm:text-lg font-bold text-graphite">${srv.name}</h4>
+                            <p class="text-xs text-stone-500 leading-relaxed">${srv.desc}</p>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-3 border-t border-stone-100">
+                            <span class="text-lg font-bold text-graphite">${formatCurrency(srv.price)}</span>
+                            <span class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${isSelected ? 'bg-terracotta text-white' : 'bg-cream text-graphite border border-stone-200'}">
+                                ${isSelected ? '<i class="fa-solid fa-check"></i> Selecionado' : '<i class="fa-solid fa-plus"></i> Adicionar'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleServiceSelection(serviceId) {
+            const idx = state.selectedServiceIds.indexOf(serviceId);
+            if (idx > -1) {
+                state.selectedServiceIds.splice(idx, 1);
+            } else {
+                state.selectedServiceIds.push(serviceId);
+            }
+            renderCatalog();
+            updateBookingSummary();
+        }
+
+        function updateBookingSummary() {
+            const selectedObjs = state.services.filter(s => state.selectedServiceIds.includes(s.id));
+            const totalPrice = selectedObjs.reduce((acc, s) => acc + Number(s.price), 0);
+            const totalDuration = selectedObjs.reduce((acc, s) => acc + Number(s.duration), 0);
+
+            // Atualiza barra flutuante
+            document.getElementById('combo-count-badge').textContent = selectedObjs.length;
+            document.getElementById('combo-duration-text').textContent = `${totalDuration} min estimados`;
+            document.getElementById('combo-price-text').textContent = `Total: ${formatCurrency(totalPrice)}`;
+            updateComboBarVisibility('agendar');
+
+            // Atualiza caixa de resumo no formulário
+            const srvText = selectedObjs.length > 0 
+                ? selectedObjs.map(s => s.name).join(' + ')
+                : 'Nenhum serviço selecionado';
+            
+            const dtText = (state.selectedDate && state.selectedTime)
+                ? `Dia ${formatDateBR(state.selectedDate)} às ${state.selectedTime} (${totalDuration} min)`
+                : 'Selecione data e horário acima';
+
+            document.getElementById('summary-services-text').textContent = srvText;
+            document.getElementById('summary-datetime-text').textContent = dtText;
+            document.getElementById('summary-total-price').textContent = formatCurrency(totalPrice);
+        }
+
+        function scrollToDateTime() {
+            document.getElementById('step-datetime').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        /**
+         * ===================================================================
+         * ÁREA DO CLIENTE: DATA E HORÁRIOS DISPONÍVEIS
+         * ===================================================================
+         */
+        function initDatePicker() {
+            const dateInput = document.getElementById('booking-date');
+            const today = getTodayStr(0);
+            dateInput.min = today;
+            dateInput.value = today;
+            state.selectedDate = today;
+            updateSelectedDateLabel();
+            renderTimeSlots();
+        }
+
+        function setQuickDate(offsetDays) {
+            const targetDate = getTodayStr(offsetDays);
+            document.getElementById('booking-date').value = targetDate;
+            handleDateChange();
+        }
+
+        function handleDateChange() {
+            const dateInput = document.getElementById('booking-date');
+            state.selectedDate = dateInput.value;
+            state.selectedTime = ''; // Reseta horário ao trocar dia
+            updateSelectedDateLabel();
+            renderTimeSlots();
+            updateBookingSummary();
+        }
+
+        function updateSelectedDateLabel() {
+            const label = document.getElementById('selected-date-label');
+            if (!state.selectedDate) {
+                label.textContent = '';
+                return;
+            }
+            const [y, m, d] = state.selectedDate.split('-');
+            const dateObj = new Date(y, m - 1, d);
+            const weekday = dateObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+            label.textContent = `Data escolhida: ${formatDateBR(state.selectedDate)} (${weekday})`;
+        }
+
+        function renderTimeSlots() {
+            const grid = document.getElementById('time-slots-grid');
+            const date = state.selectedDate;
+
+            if (!date) {
+                grid.innerHTML = `<p class="col-span-full text-xs text-stone-400">Selecione uma data primeiro.</p>`;
+                return;
+            }
+
+            // Verifica se o dia inteiro está bloqueado pelo profissional
+            const isWholeDayBlocked = state.blocks.some(b => b.date === date && b.time === 'ALL');
+            if (isWholeDayBlocked) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-red-50 text-red-700 p-4 rounded-2xl text-xs font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-xmark text-base"></i>
+                        <span>Não haverá atendimento nesta data (Agenda fechada pelo profissional). Escolha outro dia.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            // Horários já agendados (Confirmados ou Concluídos) neste dia
+            const bookedTimes = state.appointments
+                .filter(a => a.date === date && a.status !== 'Cancelado')
+                .map(a => a.time);
+
+            // Horários específicos bloqueados pelo profissional neste dia
+            const blockedTimes = state.blocks
+                .filter(b => b.date === date && b.time !== 'ALL')
+                .map(b => b.time);
+
+            // Verifica horários passados se a data for hoje
+            const now = new Date();
+            const isToday = date === getTodayStr(0);
+            const currentHour = now.getHours();
+
+            grid.innerHTML = STUDIO_CONFIG.workingHours.map(timeStr => {
+                const slotHour = parseInt(timeStr.split(':')[0], 10);
+                const isPast = isToday && slotHour <= currentHour;
+                const isOccupied = bookedTimes.includes(timeStr) || blockedTimes.includes(timeStr) || isPast;
+                const isSelected = state.selectedTime === timeStr;
+
+                if (isOccupied) {
+                    return `
+                        <button type="button" disabled class="py-2.5 px-2 rounded-xl text-xs font-semibold bg-stone-100 text-stone-400 line-through cursor-not-allowed border border-stone-200/50">
+                            ${timeStr}
+                        </button>
+                    `;
+                }
+
+                const activeClass = isSelected
+                    ? 'bg-terracotta text-white border-terracotta shadow-sm scale-[1.02]'
+                    : 'bg-cream text-graphite border-stone-200 hover:border-terracotta hover:bg-terracotta-light/30';
+
+                return `
+                    <button type="button" onclick="selectTimeSlot('${timeStr}')" class="py-2.5 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${activeClass}">
+                        ${timeStr}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectTimeSlot(timeStr) {
+            state.selectedTime = timeStr;
+            renderTimeSlots();
+            updateBookingSummary();
+        }
+
+        /**
+         * ===================================================================
+         * FINALIZAÇÃO DO AGENDAMENTO E MODAL WHATSAPP
+         * ===================================================================
+         */
+        function submitBooking(e) {
+            e.preventDefault();
+
+            if (state.selectedServiceIds.length === 0) {
+                showToast('Selecione pelo menos um serviço no Passo 1.', 'error');
+                document.getElementById('services-catalog-grid').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            if (!state.selectedDate || !state.selectedTime) {
+                showToast('Escolha uma data e um horário disponível no Passo 2.', 'error');
+                scrollToDateTime();
+                return;
+            }
+
+            const clientName = document.getElementById('client-name').value.trim();
+            const clientPhone = document.getElementById('client-phone').value.trim();
+            const clientNotes = document.getElementById('client-notes').value.trim();
+
+            if (cleanPhone(clientPhone).length < 10) {
+                showToast('Por favor, informe um número de WhatsApp válido com DDD.', 'error');
+                return;
+            }
+
+            // Dupla checagem de conflito de horário
+            const conflict = state.appointments.some(
+                a => a.date === state.selectedDate && a.time === state.selectedTime && a.status !== 'Cancelado'
+            );
+            if (conflict) {
+                showToast('Ops! Este horário acabou de ser ocupado. Escolha outro.', 'error');
+                renderTimeSlots();
+                return;
+            }
+
+            const selectedObjs = state.services.filter(s => state.selectedServiceIds.includes(s.id));
+            const totalPrice = selectedObjs.reduce((acc, s) => acc + Number(s.price), 0);
+            const totalDuration = selectedObjs.reduce((acc, s) => acc + Number(s.duration), 0);
+
+            const newAppointment = {
+                id: 'ag-' + Date.now(),
+                clientName,
+                clientPhone,
+                date: state.selectedDate,
+                time: state.selectedTime,
+                serviceIds: [...state.selectedServiceIds],
+                servicesSnapshot: selectedObjs.map(s => ({ name: s.name, price: s.price, duration: s.duration })),
+                totalPrice,
+                totalDuration,
+                notes: clientNotes,
+                status: 'Confirmado',
+                createdAt: new Date().toISOString()
+            };
+
+            state.appointments.push(newAppointment);
+            saveAppointmentsToStorage();
+
+            // Prepara e exibe o modal de comprovante
+            openSuccessModal(newAppointment);
+
+            // Reseta seleção do formulário
+            state.selectedServiceIds = [];
+            state.selectedTime = '';
+            document.getElementById(
