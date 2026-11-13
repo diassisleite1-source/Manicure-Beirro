@@ -1618,41 +1618,61 @@
         let deferredInstallPrompt = null;
         const installButton = document.getElementById('install-app-btn');
 
+        if (installButton) {
+            installButton.addEventListener('click', async () => {
+                if (deferredInstallPrompt) {
+                    deferredInstallPrompt.prompt();
+                    const choice = await deferredInstallPrompt.userChoice;
+                    if (choice && choice.outcome === 'accepted') installButton.classList.add('hidden');
+                    deferredInstallPrompt = null;
+                    return;
+                }
+
+                if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+                    alert('O BellaPés & Mãos já está instalado neste aparelho.');
+                    return;
+                }
+
+                const isAndroid = /Android/i.test(navigator.userAgent);
+                const isChrome = /Chrome\//i.test(navigator.userAgent) && !/EdgA\//i.test(navigator.userAgent);
+                if (isAndroid && isChrome) {
+                    alert('Para instalar: toque nos três pontinhos (⋮) do Chrome e escolha “Instalar aplicativo” ou “Adicionar à tela inicial”. Se essa opção não aparecer, confirme se o site está publicado em HTTPS e se o Service Worker foi ativado.');
+                } else {
+                    alert('Abra este aplicativo pelo Google Chrome no Android, usando o endereço HTTPS do site.');
+                }
+            });
+        }
+
         window.addEventListener('beforeinstallprompt', event => {
             event.preventDefault();
             deferredInstallPrompt = event;
-            installButton.classList.remove('hidden');
+            if (installButton) {
+                installButton.classList.remove('hidden');
+                installButton.querySelector('span').textContent = 'Instalar aplicativo';
+            }
         });
 
         window.addEventListener('appinstalled', () => {
             deferredInstallPrompt = null;
-            installButton.classList.add('hidden');
+            if (installButton) installButton.classList.add('hidden');
             if (typeof showToast === 'function') showToast('Aplicativo instalado com sucesso!', 'success');
         });
 
-        installButton.addEventListener('click', async () => {
-            if (deferredInstallPrompt) {
-                deferredInstallPrompt.prompt();
-                const choice = await deferredInstallPrompt.userChoice;
-                deferredInstallPrompt = null;
-                if (choice && choice.outcome === 'accepted') installButton.classList.add('hidden');
-                return;
-            }
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                alert('O BellaPés & Mãos já está instalado no seu aparelho.');
-            } else {
-                alert('Para instalar: no Chrome do Android, toque nos três pontinhos (⋮) e escolha "Instalar aplicativo" ou "Adicionar à tela inicial". Se a opção não aparecer, abra este site pelo endereço HTTPS.');
-            }
-        });
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(error => console.error('Falha ao registrar o aplicativo:', error));
+        if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+            window.addEventListener('load', async () => {
+                try {
+                    await navigator.serviceWorker.register('./sw.js', { scope: './' });
+                    await navigator.serviceWorker.ready;
+                    document.documentElement.dataset.pwaReady = 'true';
+                } catch (error) {
+                    console.error('Falha ao registrar o aplicativo:', error);
+                    document.documentElement.dataset.pwaReady = 'false';
+                }
             });
         }
 
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            installButton.classList.add('hidden');
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            if (installButton) installButton.classList.add('hidden');
         }
     </script>
 
