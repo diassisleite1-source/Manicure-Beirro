@@ -597,6 +597,43 @@
     <!-- =====================================================================
          JAVASCRIPT INTEGRADO (LÓGICA, ESTADO E LOCALSTORAGE)
          ===================================================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkrIjDCv3liugwucjfA5auR5Xbm_wYvZc",
+            authDomain: "bellapes-maos.firebaseapp.com",
+            projectId: "bellapes-maos",
+            storageBucket: "bellapes-maos.firebasestorage.app",
+            messagingSenderId: "569461304335",
+            appId: "1:569461304335:web:7155c8879f9c165311077a",
+            measurementId: "G-SS0910MTHT"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+        const appDataRef = doc(db, "bellapes", "dadosDoEstudio");
+        let saveQueue = Promise.resolve();
+
+        window.firebaseReady = (async () => {
+            const snapshot = await getDoc(appDataRef);
+            return snapshot.exists() ? snapshot.data() : null;
+        })();
+
+        window.firebaseSaveData = () => {
+            const data = {
+                services: window.appState.services,
+                appointments: window.appState.appointments,
+                blocks: window.appState.blocks,
+                updatedAt: new Date().toISOString()
+            };
+            saveQueue = saveQueue.then(() => setDoc(appDataRef, data));
+            saveQueue.catch(error => console.error("Erro ao salvar no Firebase:", error));
+            return saveQueue;
+        };
+    </script>
+
     <script>
         /**
          * ===================================================================
@@ -640,6 +677,7 @@
             adminAgendaFilter: 'today',
             isAdminLogged: false
         };
+        window.appState = state;
 
         /**
          * ===================================================================
@@ -830,14 +868,17 @@
 
         function saveServicesToStorage() {
             localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(state.services));
+            if (window.firebaseSaveData) window.firebaseSaveData();
         }
 
         function saveAppointmentsToStorage() {
             localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(state.appointments));
+            if (window.firebaseSaveData) window.firebaseSaveData();
         }
 
         function saveBlocksToStorage() {
             localStorage.setItem(STORAGE_KEYS.BLOCKS, JSON.stringify(state.blocks));
+            if (window.firebaseSaveData) window.firebaseSaveData();
         }
 
         /**
@@ -1531,7 +1572,17 @@
             })[char]);
         }
 
-        function initApp() {
+        async function initApp() {
+            try {
+                const cloudData = await window.firebaseReady;
+                if (cloudData) {
+                    if (Array.isArray(cloudData.services)) localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(cloudData.services));
+                    if (Array.isArray(cloudData.appointments)) localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(cloudData.appointments));
+                    if (Array.isArray(cloudData.blocks)) localStorage.setItem(STORAGE_KEYS.BLOCKS, JSON.stringify(cloudData.blocks));
+                }
+            } catch (error) {
+                console.error("Não foi possível conectar ao Firebase. O sistema usará os dados locais:", error);
+            }
             initData();
             initDatePicker();
             renderCatalog();
@@ -1546,6 +1597,7 @@
             document.getElementById('success-modal').addEventListener('click', e => {
                 if (e.target.id === 'success-modal') closeSuccessModal();
             });
+            if (window.firebaseSaveData) window.firebaseSaveData();
         }
 
         document.addEventListener('DOMContentLoaded', initApp);
