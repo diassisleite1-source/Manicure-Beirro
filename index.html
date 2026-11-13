@@ -1186,4 +1186,370 @@
             // Reseta seleção do formulário
             state.selectedServiceIds = [];
             state.selectedTime = '';
-            document.getElementById(
+
+            document.getElementById('booking-form').reset();
+            document.getElementById('booking-date').value = getTodayStr(0);
+            state.selectedDate = getTodayStr(0);
+            updateSelectedDateLabel();
+            updateBookingSummary();
+            renderTimeSlots();
+            renderCatalog();
+        }
+
+        function openSuccessModal(appointment) {
+            const services = appointment.servicesSnapshot.map(s => s.name).join(', ');
+            document.getElementById('receipt-details').innerHTML = `
+                <p><strong>Cliente:</strong> ${escapeHTML(appointment.clientName)}</p>
+                <p><strong>Telefone:</strong> ${escapeHTML(appointment.clientPhone)}</p>
+                <p><strong>Data:</strong> ${formatDateBR(appointment.date)} às ${appointment.time}</p>
+                <p><strong>Serviços:</strong> ${escapeHTML(services)}</p>
+                <p><strong>Duração:</strong> ${appointment.totalDuration} minutos</p>
+                <p><strong>Total:</strong> ${formatCurrency(appointment.totalPrice)}</p>`;
+            const message = `Olá! Meu agendamento no ${STUDIO_CONFIG.name} foi confirmado.%0ACliente: ${encodeURIComponent(appointment.clientName)}%0AData: ${formatDateBR(appointment.date)} às ${appointment.time}%0AServiços: ${encodeURIComponent(services)}%0ATotal: ${encodeURIComponent(formatCurrency(appointment.totalPrice))}`;
+            const link = document.getElementById('whatsapp-share-link');
+            link.href = `https://wa.me/${STUDIO_CONFIG.whatsappNumber}?text=${message}`;
+            document.getElementById('success-modal').classList.remove('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.add('hidden');
+            switchTab('agendar');
+        }
+
+        function searchClientAppointments(e) {
+            e.preventDefault();
+            const phone = cleanPhone(document.getElementById('search-client-phone').value);
+            const results = document.getElementById('client-appointments-results');
+            if (phone.length < 10) {
+                showToast('Informe um telefone válido com DDD.', 'error');
+                return;
+            }
+            const found = state.appointments.filter(a => cleanPhone(a.clientPhone) === phone);
+            if (!found.length) {
+                results.innerHTML = '<div class="bg-white rounded-2xl p-6 text-center text-sm text-stone-500">Nenhum agendamento encontrado para este número.</div>';
+                return;
+            }
+            results.innerHTML = found.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time)).map(a => `
+                <article class="bg-white rounded-2xl p-5 border border-stone-200 space-y-2">
+                    <div class="flex justify-between gap-3 items-start">
+                        <strong>${formatDateBR(a.date)} às ${a.time}</strong>
+                        <span class="text-xs font-bold ${a.status === 'Cancelado' ? 'text-red-600' : a.status === 'Concluído' ? 'text-sage' : 'text-terracotta-dark'}">${escapeHTML(a.status)}</span>
+                    </div>
+                    <p class="text-sm text-stone-600">${escapeHTML((a.servicesSnapshot || []).map(s => s.name).join(', '))}</p>
+                    <p class="text-sm font-bold">${formatCurrency(a.totalPrice)}</p>
+                    ${a.status === 'Confirmado' ? `<button type="button" onclick="cancelClientAppointment('${a.id}')" class="text-xs font-semibold text-red-600 underline">Cancelar agendamento</button>` : ''}
+                </article>`).join('');
+        }
+
+        function cancelClientAppointment(id) {
+            const appointment = state.appointments.find(a => a.id === id);
+            if (!appointment || appointment.status !== 'Confirmado') return;
+            showConfirm('Cancelar agendamento', 'Deseja realmente cancelar este horário?', () => {
+                appointment.status = 'Cancelado';
+                saveAppointmentsToStorage();
+                const phoneInput = document.getElementById('search-client-phone');
+                document.getElementById('search-client-phone').value = phoneInput.value;
+                searchClientAppointments({ preventDefault() {} });
+                renderTimeSlots();
+                showToast('Agendamento cancelado.', 'success');
+            });
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const password = document.getElementById('admin-password-input').value;
+            if (password !== STUDIO_CONFIG.adminPassword) {
+                showToast('Senha incorreta.', 'error');
+                return;
+            }
+            state.isAdminLogged = true;
+            sessionStorage.setItem(STORAGE_KEYS.ADMIN_AUTH, 'true');
+            document.getElementById('admin-password-input').value = '';
+            renderAdminView();
+            showToast('Acesso autorizado.', 'success');
+        }
+
+        function logoutAdmin() {
+            state.isAdminLogged = false;
+            sessionStorage.removeItem(STORAGE_KEYS.ADMIN_AUTH);
+            renderAdminView();
+            showToast('Você saiu do painel.', 'success');
+        }
+
+        function renderAdminView() {
+            const login = document.getElementById('admin-login-box');
+            const dashboard = document.getElementById('admin-dashboard-content');
+            login.classList.toggle('hidden', state.isAdminLogged);
+            dashboard.classList.toggle('hidden', !state.isAdminLogged);
+            if (state.isAdminLogged) {
+                updateAdminStats();
+                renderAdminAppointments();
+                renderAdminServices();
+                renderAdminBlocks();
+            }
+        }
+
+        function updateAdminStats() {
+            const today = getTodayStr();
+            const todayAppointments = state.appointments.filter(a => a.date === today && a.status !== 'Cancelado');
+            document.getElementById('stat-today-count').textContent = todayAppointments.length;
+            document.getElementById('stat-today-revenue').textContent = formatCurrency(todayAppointments.reduce((sum,a) => sum + Number(a.totalPrice || 0), 0));
+            document.getElementById('stat-completed-count').textContent = state.appointments.filter(a => a.status === 'Concluído').length;
+        }
+
+        function switchAdminSubtab(tab) {
+            ['agenda', 'servicos', 'bloqueios'].forEach(name => {
+                document.getElementById(`admin-sub-${name}`).classList.toggle('hidden', name !== tab);
+                const btn = document.getElementById(`subtab-btn-${name}`);
+                btn.classList.toggle('bg-graphite', name === tab);
+                btn.classList.toggle('text-white', name === tab);
+                btn.classList.toggle('text-stone-600', name !== tab);
+            });
+            if (tab === 'agenda') renderAdminAppointments();
+            if (tab === 'servicos') renderAdminServices();
+            if (tab === 'bloqueios') renderAdminBlocks();
+        }
+
+        function setAdminAgendaFilter(filter) {
+            state.adminAgendaFilter = filter;
+            ['today', 'tomorrow', 'all'].forEach(name => {
+                const btn = document.getElementById(`filter-ag-${name}`);
+                btn.classList.toggle('bg-sage', name === filter);
+                btn.classList.toggle('text-white', name === filter);
+                btn.classList.toggle('bg-cream', name !== filter);
+                btn.classList.toggle('text-stone-600', name !== filter);
+            });
+            renderAdminAppointments();
+        }
+
+        function renderAdminAppointments() {
+            const container = document.getElementById('admin-appointments-list');
+            let list = [...state.appointments];
+            if (state.adminAgendaFilter === 'today') list = list.filter(a => a.date === getTodayStr());
+            else if (state.adminAgendaFilter === 'tomorrow') list = list.filter(a => a.date === getTodayStr(1));
+            else if (state.adminAgendaFilter === 'all') list = list;
+            else if (state.adminAgendaFilter === 'custom') {
+                const date = document.getElementById('admin-filter-date').value;
+                list = list.filter(a => a.date === date);
+            }
+            list.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+            if (!list.length) {
+                container.innerHTML = '<div class="bg-white rounded-2xl p-6 text-center text-sm text-stone-500">Nenhum agendamento neste filtro.</div>';
+                updateAdminStats();
+                return;
+            }
+            container.innerHTML = list.map(a => `
+                <article class="bg-white rounded-2xl border border-stone-200 p-4 sm:p-5 space-y-3">
+                    <div class="flex flex-wrap justify-between gap-2">
+                        <div><strong>${formatDateBR(a.date)} • ${a.time}</strong><p class="text-sm text-stone-600">${escapeHTML(a.clientName)} • ${escapeHTML(a.clientPhone)}</p></div>
+                        <strong class="text-sage">${formatCurrency(a.totalPrice)}</strong>
+                    </div>
+                    <p class="text-xs text-stone-600">${escapeHTML((a.servicesSnapshot || []).map(s => s.name).join(', '))}</p>
+                    ${a.notes ? `<p class="text-xs text-stone-500">Observações: ${escapeHTML(a.notes)}</p>` : ''}
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold">${escapeHTML(a.status)}</span>
+                        ${a.status === 'Confirmado' ? `<button onclick="changeAppointmentStatus('${a.id}','Concluído')" class="px-3 py-2 rounded-lg bg-sage text-white text-xs">Concluir</button><button onclick="changeAppointmentStatus('${a.id}','Cancelado')" class="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs">Cancelar</button>` : ''}
+                        <button onclick="deleteAppointment('${a.id}')" class="px-3 py-2 rounded-lg bg-stone-100 text-stone-600 text-xs">Excluir</button>
+                    </div>
+                </article>`).join('');
+            updateAdminStats();
+        }
+
+        function changeAppointmentStatus(id, status) {
+            const item = state.appointments.find(a => a.id === id);
+            if (!item) return;
+            item.status = status;
+            saveAppointmentsToStorage();
+            renderAdminAppointments();
+            renderTimeSlots();
+            showToast('Status atualizado.', 'success');
+        }
+
+        function deleteAppointment(id) {
+            showConfirm('Excluir agendamento', 'Esta ação não poderá ser desfeita. Deseja continuar?', () => {
+                state.appointments = state.appointments.filter(a => a.id !== id);
+                saveAppointmentsToStorage();
+                renderAdminAppointments();
+                renderTimeSlots();
+                showToast('Agendamento excluído.', 'success');
+            });
+        }
+
+        function saveServiceForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-service-id').value;
+            const service = {
+                id: id || `srv-${Date.now()}`,
+                name: document.getElementById('srv-name').value.trim(),
+                category: document.getElementById('srv-category').value,
+                price: Number(document.getElementById('srv-price').value),
+                duration: Number(document.getElementById('srv-duration').value),
+                desc: document.getElementById('srv-desc').value.trim(),
+                active: true
+            };
+            if (!service.name || !service.desc || !Number.isFinite(service.price) || service.price <= 0 || !Number.isFinite(service.duration) || service.duration < 10) {
+                showToast('Confira os dados do serviço.', 'error');
+                return;
+            }
+            if (id) {
+                const index = state.services.findIndex(s => s.id === id);
+                if (index !== -1) state.services[index] = {...state.services[index], ...service};
+            } else state.services.push(service);
+            saveServicesToStorage();
+            resetServiceForm();
+            renderAdminServices();
+            renderCatalog();
+            showToast('Serviço salvo.', 'success');
+        }
+
+        function renderAdminServices() {
+            const container = document.getElementById('admin-services-list');
+            container.innerHTML = state.services.map(s => `
+                <article class="bg-white rounded-2xl border border-stone-200 p-4 flex justify-between gap-3">
+                    <div><strong class="text-sm">${escapeHTML(s.name)}</strong><p class="text-xs text-stone-500">${formatCurrency(s.price)} • ${s.duration} min • ${s.active ? 'Ativo' : 'Inativo'}</p><p class="text-xs text-stone-500 mt-1">${escapeHTML(s.desc)}</p></div>
+                    <div class="flex flex-col gap-2 shrink-0">
+                        <button onclick="editService('${s.id}')" class="text-xs text-sage font-semibold">Editar</button>
+                        <button onclick="toggleServiceActive('${s.id}')" class="text-xs text-terracotta-dark font-semibold">${s.active ? 'Desativar' : 'Ativar'}</button>
+                        <button onclick="deleteService('${s.id}')" class="text-xs text-red-600 font-semibold">Excluir</button>
+                    </div>
+                </article>`).join('') || '<p class="text-sm text-stone-500">Nenhum serviço cadastrado.</p>';
+        }
+
+        function editService(id) {
+            const s = state.services.find(item => item.id === id);
+            if (!s) return;
+            document.getElementById('edit-service-id').value = s.id;
+            document.getElementById('srv-name').value = s.name;
+            document.getElementById('srv-category').value = s.category;
+            document.getElementById('srv-price').value = s.price;
+            document.getElementById('srv-duration').value = s.duration;
+            document.getElementById('srv-desc').value = s.desc;
+            document.getElementById('service-form-title').textContent = 'Editar Serviço';
+            document.getElementById('cancel-edit-service-btn').classList.remove('hidden');
+            document.getElementById('admin-sub-servicos').scrollIntoView({behavior:'smooth'});
+        }
+
+        function resetServiceForm() {
+            document.querySelector('#admin-sub-servicos form').reset();
+            document.getElementById('edit-service-id').value = '';
+            document.getElementById('service-form-title').textContent = 'Adicionar Novo Serviço';
+            document.getElementById('cancel-edit-service-btn').classList.add('hidden');
+        }
+
+        function toggleServiceActive(id) {
+            const s = state.services.find(item => item.id === id);
+            if (!s) return;
+            s.active = !s.active;
+            if (!s.active) state.selectedServiceIds = state.selectedServiceIds.filter(x => x !== id);
+            saveServicesToStorage();
+            renderAdminServices();
+            renderCatalog();
+            updateBookingSummary();
+        }
+
+        function deleteService(id) {
+            showConfirm('Excluir serviço', 'Deseja excluir este serviço do catálogo?', () => {
+                state.services = state.services.filter(s => s.id !== id);
+                state.selectedServiceIds = state.selectedServiceIds.filter(x => x !== id);
+                saveServicesToStorage();
+                renderAdminServices();
+                renderCatalog();
+                updateBookingSummary();
+                showToast('Serviço excluído.', 'success');
+            });
+        }
+
+        function addScheduleBlock(e) {
+            e.preventDefault();
+            const date = document.getElementById('block-date').value;
+            const time = document.getElementById('block-time').value;
+            if (!date || date < getTodayStr()) {
+                showToast('Escolha uma data válida, a partir de hoje.', 'error');
+                return;
+            }
+            const duplicate = state.blocks.some(b => b.date === date && (b.time === 'ALL' || time === 'ALL' || b.time === time));
+            if (duplicate) {
+                showToast('Este período já está bloqueado.', 'error');
+                return;
+            }
+            state.blocks.push({id:`bl-${Date.now()}`, date, time});
+            saveBlocksToStorage();
+            renderAdminBlocks();
+            renderTimeSlots();
+            e.target.reset();
+            showToast('Bloqueio aplicado.', 'success');
+        }
+
+        function renderAdminBlocks() {
+            const container = document.getElementById('admin-blocks-list');
+            const blocks = [...state.blocks].sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+            container.innerHTML = blocks.map(b => `
+                <div class="flex items-center justify-between gap-3 bg-cream rounded-xl p-3">
+                    <span class="text-xs font-semibold">${formatDateBR(b.date)} • ${b.time === 'ALL' ? 'Dia inteiro' : b.time}</span>
+                    <button onclick="removeScheduleBlock('${b.id}')" class="text-xs text-red-600 font-semibold">Remover</button>
+                </div>`).join('') || '<p class="text-xs text-stone-500">Nenhum bloqueio ativo.</p>';
+        }
+
+        function removeScheduleBlock(id) {
+            state.blocks = state.blocks.filter(b => b.id !== id);
+            saveBlocksToStorage();
+            renderAdminBlocks();
+            renderTimeSlots();
+            showToast('Bloqueio removido.', 'success');
+        }
+
+        let confirmCallback = null;
+        function showConfirm(title, description, callback) {
+            document.getElementById('confirm-modal-title').textContent = title;
+            document.getElementById('confirm-modal-desc').textContent = description;
+            confirmCallback = callback;
+            document.getElementById('confirm-modal-yes-btn').onclick = () => {
+                const action = confirmCallback;
+                closeConfirmModal();
+                if (typeof action === 'function') action();
+            };
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            confirmCallback = null;
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto rounded-xl px-4 py-3 shadow-lg text-sm text-white ${type === 'error' ? 'bg-red-600' : 'bg-sage'}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            window.setTimeout(() => toast.remove(), 3200);
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+            })[char]);
+        }
+
+        function initApp() {
+            initData();
+            initDatePicker();
+            renderCatalog();
+            updateBookingSummary();
+            renderTimeSlots();
+            renderAdminView();
+            document.getElementById('block-date').min = getTodayStr();
+            document.getElementById('admin-filter-date').value = getTodayStr();
+            document.getElementById('confirm-modal').addEventListener('click', e => {
+                if (e.target.id === 'confirm-modal') closeConfirmModal();
+            });
+            document.getElementById('success-modal').addEventListener('click', e => {
+                if (e.target.id === 'success-modal') closeSuccessModal();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+</body>
+</html>
