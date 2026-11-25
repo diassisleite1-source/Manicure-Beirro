@@ -1,9 +1,8 @@
-
 {
   "id": "./index.html",
   "name": "Estúdio BellaPés & Mãos",
   "short_name": "BellaPés",
-  "description": "Agendamentos do Estúdio BellaPés & Mãos",
+  "description": "Agendamento online de manicure, pedicure, spa dos pés e calista.",
   "lang": "pt-BR",
   "start_url": "./index.html",
   "scope": "./",
@@ -21,13 +20,13 @@
       "src": "./icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "./icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
