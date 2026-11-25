@@ -1,4 +1,287 @@
-<!DOCTYPE html>
+                    </div>
+                    <p class="text-xs text-stone-600">${escapeHTML((a.servicesSnapshot || []).map(s => s.name).join(', '))}</p>
+                    ${a.notes ? `<p class="text-xs text-stone-500">Observações: ${escapeHTML(a.notes)}</p>` : ''}
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold">${escapeHTML(a.status)}</span>
+                        ${a.status === 'Confirmado' ? `<button onclick="changeAppointmentStatus('${a.id}','Concluído')" class="px-3 py-2 rounded-lg bg-sage text-white text-xs">Concluir</button><button onclick="changeAppointmentStatus('${a.id}','Cancelado')" class="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs">Cancelar</button>` : ''}
+                        <button onclick="deleteAppointment('${a.id}')" class="px-3 py-2 rounded-lg bg-stone-100 text-stone-600 text-xs">Excluir</button>
+                    </div>
+                </article>`).join('');
+            updateAdminStats();
+        }
+
+        function changeAppointmentStatus(id, status) {
+            const item = state.appointments.find(a => a.id === id);
+            if (!item) return;
+            item.status = status;
+            saveAppointmentsToStorage();
+            renderAdminAppointments();
+            renderTimeSlots();
+            showToast('Status atualizado.', 'success');
+        }
+
+        function deleteAppointment(id) {
+            showConfirm('Excluir agendamento', 'Esta ação não poderá ser desfeita. Deseja continuar?', () => {
+                state.appointments = state.appointments.filter(a => a.id !== id);
+                saveAppointmentsToStorage();
+                renderAdminAppointments();
+                renderTimeSlots();
+                showToast('Agendamento excluído.', 'success');
+            });
+        }
+
+        function saveServiceForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-service-id').value;
+            const service = {
+                id: id || `srv-${Date.now()}`,
+                name: document.getElementById('srv-name').value.trim(),
+                category: document.getElementById('srv-category').value,
+                price: Number(document.getElementById('srv-price').value),
+                duration: Number(document.getElementById('srv-duration').value),
+                desc: document.getElementById('srv-desc').value.trim(),
+                active: true
+            };
+            if (!service.name || !service.desc || !Number.isFinite(service.price) || service.price <= 0 || !Number.isFinite(service.duration) || service.duration < 10) {
+                showToast('Confira os dados do serviço.', 'error');
+                return;
+            }
+            if (id) {
+                const index = state.services.findIndex(s => s.id === id);
+                if (index !== -1) state.services[index] = {...state.services[index], ...service};
+            } else state.services.push(service);
+            saveServicesToStorage();
+            resetServiceForm();
+            renderAdminServices();
+            renderCatalog();
+            showToast('Serviço salvo.', 'success');
+        }
+
+        function renderAdminServices() {
+            const container = document.getElementById('admin-services-list');
+            container.innerHTML = state.services.map(s => `
+                <article class="bg-white rounded-2xl border border-stone-200 p-4 flex justify-between gap-3">
+                    <div><strong class="text-sm">${escapeHTML(s.name)}</strong><p class="text-xs text-stone-500">${formatCurrency(s.price)} • ${s.duration} min • ${s.active ? 'Ativo' : 'Inativo'}</p><p class="text-xs text-stone-500 mt-1">${escapeHTML(s.desc)}</p></div>
+                    <div class="flex flex-col gap-2 shrink-0">
+                        <button onclick="editService('${s.id}')" class="text-xs text-sage font-semibold">Editar</button>
+                        <button onclick="toggleServiceActive('${s.id}')" class="text-xs text-terracotta-dark font-semibold">${s.active ? 'Desativar' : 'Ativar'}</button>
+                        <button onclick="deleteService('${s.id}')" class="text-xs text-red-600 font-semibold">Excluir</button>
+                    </div>
+                </article>`).join('') || '<p class="text-sm text-stone-500">Nenhum serviço cadastrado.</p>';
+        }
+
+        function editService(id) {
+            const s = state.services.find(item => item.id === id);
+            if (!s) return;
+            document.getElementById('edit-service-id').value = s.id;
+            document.getElementById('srv-name').value = s.name;
+            document.getElementById('srv-category').value = s.category;
+            document.getElementById('srv-price').value = s.price;
+            document.getElementById('srv-duration').value = s.duration;
+            document.getElementById('srv-desc').value = s.desc;
+            document.getElementById('service-form-title').textContent = 'Editar Serviço';
+            document.getElementById('cancel-edit-service-btn').classList.remove('hidden');
+            document.getElementById('admin-sub-servicos').scrollIntoView({behavior:'smooth'});
+        }
+
+        function resetServiceForm() {
+            document.querySelector('#admin-sub-servicos form').reset();
+            document.getElementById('edit-service-id').value = '';
+            document.getElementById('service-form-title').textContent = 'Adicionar Novo Serviço';
+            document.getElementById('cancel-edit-service-btn').classList.add('hidden');
+        }
+
+        function toggleServiceActive(id) {
+            const s = state.services.find(item => item.id === id);
+            if (!s) return;
+            s.active = !s.active;
+            if (!s.active) state.selectedServiceIds = state.selectedServiceIds.filter(x => x !== id);
+            saveServicesToStorage();
+            renderAdminServices();
+            renderCatalog();
+            updateBookingSummary();
+        }
+
+        function deleteService(id) {
+            showConfirm('Excluir serviço', 'Deseja excluir este serviço do catálogo?', () => {
+                state.services = state.services.filter(s => s.id !== id);
+                state.selectedServiceIds = state.selectedServiceIds.filter(x => x !== id);
+                saveServicesToStorage();
+                renderAdminServices();
+                renderCatalog();
+                updateBookingSummary();
+                showToast('Serviço excluído.', 'success');
+            });
+        }
+
+        function addScheduleBlock(e) {
+            e.preventDefault();
+            const date = document.getElementById('block-date').value;
+            const time = document.getElementById('block-time').value;
+            if (!date || date < getTodayStr()) {
+                showToast('Escolha uma data válida, a partir de hoje.', 'error');
+                return;
+            }
+            const duplicate = state.blocks.some(b => b.date === date && (b.time === 'ALL' || time === 'ALL' || b.time === time));
+            if (duplicate) {
+                showToast('Este período já está bloqueado.', 'error');
+                return;
+            }
+            state.blocks.push({id:`bl-${Date.now()}`, date, time});
+            saveBlocksToStorage();
+            renderAdminBlocks();
+            renderTimeSlots();
+            e.target.reset();
+            showToast('Bloqueio aplicado.', 'success');
+        }
+
+        function renderAdminBlocks() {
+            const container = document.getElementById('admin-blocks-list');
+            const blocks = [...state.blocks].sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
+            container.innerHTML = blocks.map(b => `
+                <div class="flex items-center justify-between gap-3 bg-cream rounded-xl p-3">
+                    <span class="text-xs font-semibold">${formatDateBR(b.date)} • ${b.time === 'ALL' ? 'Dia inteiro' : b.time}</span>
+                    <button onclick="removeScheduleBlock('${b.id}')" class="text-xs text-red-600 font-semibold">Remover</button>
+                </div>`).join('') || '<p class="text-xs text-stone-500">Nenhum bloqueio ativo.</p>';
+        }
+
+        function removeScheduleBlock(id) {
+            state.blocks = state.blocks.filter(b => b.id !== id);
+            saveBlocksToStorage();
+            renderAdminBlocks();
+            renderTimeSlots();
+            showToast('Bloqueio removido.', 'success');
+        }
+
+        let confirmCallback = null;
+        function showConfirm(title, description, callback) {
+            document.getElementById('confirm-modal-title').textContent = title;
+            document.getElementById('confirm-modal-desc').textContent = description;
+            confirmCallback = callback;
+            document.getElementById('confirm-modal-yes-btn').onclick = () => {
+                const action = confirmCallback;
+                closeConfirmModal();
+                if (typeof action === 'function') action();
+            };
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            confirmCallback = null;
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto rounded-xl px-4 py-3 shadow-lg text-sm text-white ${type === 'error' ? 'bg-red-600' : 'bg-sage'}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            window.setTimeout(() => toast.remove(), 3200);
+        }
+
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+            })[char]);
+        }
+
+        async function initApp() {
+            try {
+                const cloudData = await window.firebaseReady;
+                if (cloudData) {
+                    if (Array.isArray(cloudData.services)) localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(cloudData.services));
+                    if (Array.isArray(cloudData.appointments)) localStorage.setItem(STORAGE_KEYS.APPOINTMENTS, JSON.stringify(cloudData.appointments));
+                    if (Array.isArray(cloudData.blocks)) localStorage.setItem(STORAGE_KEYS.BLOCKS, JSON.stringify(cloudData.blocks));
+                }
+            } catch (error) {
+                console.error("Não foi possível conectar ao Firebase. O sistema usará os dados locais:", error);
+            }
+            initData();
+            initDatePicker();
+            renderCatalog();
+            updateBookingSummary();
+            renderTimeSlots();
+            renderAdminView();
+            document.getElementById('block-date').min = getTodayStr();
+            document.getElementById('admin-filter-date').value = getTodayStr();
+            document.getElementById('confirm-modal').addEventListener('click', e => {
+                if (e.target.id === 'confirm-modal') closeConfirmModal();
+            });
+            document.getElementById('success-modal').addEventListener('click', e => {
+                if (e.target.id === 'success-modal') closeSuccessModal();
+            });
+            if (window.firebaseSaveData) window.firebaseSaveData();
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
+
+    <script>
+        let deferredInstallPrompt = null;
+        const installButton = document.getElementById('install-app-btn');
+
+        if (installButton) {
+            installButton.addEventListener('click', async () => {
+                if (deferredInstallPrompt) {
+                    deferredInstallPrompt.prompt();
+                    const choice = await deferredInstallPrompt.userChoice;
+                    if (choice && choice.outcome === 'accepted') installButton.classList.add('hidden');
+                    deferredInstallPrompt = null;
+                    return;
+                }
+
+                if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+                    alert('O BellaPés & Mãos já está instalado neste aparelho.');
+                    return;
+                }
+
+                const isAndroid = /Android/i.test(navigator.userAgent);
+                const isChrome = /Chrome\//i.test(navigator.userAgent) && !/EdgA\//i.test(navigator.userAgent);
+                if (isAndroid && isChrome) {
+                    alert('Para instalar: toque nos três pontinhos (⋮) do Chrome e escolha “Instalar aplicativo” ou “Adicionar à tela inicial”. Se essa opção não aparecer, confirme se o site está publicado em HTTPS e se o Service Worker foi ativado.');
+                } else {
+                    alert('Abra este aplicativo pelo Google Chrome no Android, usando o endereço HTTPS do site.');
+                }
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', event => {
+            event.preventDefault();
+            deferredInstallPrompt = event;
+            if (installButton) {
+                installButton.classList.remove('hidden');
+                installButton.querySelector('span').textContent = 'Instalar aplicativo';
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredInstallPrompt = null;
+            if (installButton) installButton.classList.add('hidden');
+            if (typeof showToast === 'function') showToast('Aplicativo instalado com sucesso!', 'success');
+        });
+
+        if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+            window.addEventListener('load', async () => {
+                try {
+                    await navigator.serviceWorker.register('./sw.js', { scope: './' });
+                    await navigator.serviceWorker.ready;
+                    document.documentElement.dataset.pwaReady = 'true';
+                } catch (error) {
+                    console.error('Falha ao registrar o aplicativo:', error);
+                    document.documentElement.dataset.pwaReady = 'false';
+                }
+            });
+        }
+
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            if (installButton) installButton.classList.add('hidden');
+        }
+    </script>
+
+</body>
+</html><!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
