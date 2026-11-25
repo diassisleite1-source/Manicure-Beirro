@@ -87,6 +87,164 @@
             background: #D4A373;
             border-radius: 9999px;
         }
+
+
+        /* ================================================================
+           RENOVAÇÃO VISUAL — ROSA, NUDE, LILÁS E DOURADO
+           Apenas CSS: não altera funções, dados, Firebase ou agendamentos.
+           ================================================================ */
+        :root {
+            --beauty-rose: #c96f91;
+            --beauty-rose-dark: #a94e73;
+            --beauty-rose-light: #fcecf2;
+            --beauty-nude: #fbf5f1;
+            --beauty-lilac: #eee8f8;
+            --beauty-gold: #c9a46b;
+            --beauty-ink: #403442;
+            --beauty-border: #f0dfe7;
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            color: var(--beauty-ink);
+            background:
+                radial-gradient(ellipse at 8% 4%, rgba(238,232,248,.72), transparent 32%),
+                radial-gradient(ellipse at 95% 18%, rgba(252,236,242,.82), transparent 34%),
+                linear-gradient(145deg, #fffaf8 0%, #fff 48%, #fbf7fc 100%);
+        }
+
+        header {
+            background: rgba(255,255,255,.88) !important;
+            border-color: var(--beauty-border) !important;
+            box-shadow: 0 8px 28px rgba(112,72,91,.07);
+        }
+
+        header .rounded-2xl.bg-gradient-to-br {
+            box-shadow: 0 7px 18px rgba(169,78,115,.22);
+        }
+
+        h1, h2, h3 { letter-spacing: -.025em; }
+        main { animation: beautyPageIn .65s ease both; }
+        .fade-in { animation: beautyPageIn .48s cubic-bezier(.2,.7,.25,1) both; }
+
+        @keyframes beautyPageIn {
+            from { opacity: 0; transform: translateY(13px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes beautySoftPulse {
+            0%, 100% { box-shadow: 0 8px 24px rgba(169,78,115,.09); }
+            50% { box-shadow: 0 12px 30px rgba(169,78,115,.16); }
+        }
+        @keyframes beautyFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        /* Paleta aplicada às cores que já existem no aplicativo */
+        .text-terracotta, .text-terracotta-dark { color: var(--beauty-rose-dark) !important; }
+        .bg-terracotta { background-color: var(--beauty-rose) !important; }
+        .bg-terracotta-light { background-color: var(--beauty-rose-light) !important; }
+        .border-terracotta { border-color: var(--beauty-rose) !important; }
+        .ring-terracotta\/30 { --tw-ring-color: rgba(201,111,145,.30) !important; }
+        .text-sage { color: #8a668e !important; }
+        .bg-sage { background-color: #98769c !important; }
+        .bg-sage-light { background-color: var(--beauty-lilac) !important; }
+        .border-stone-200\/80, .border-stone-200\/60 { border-color: var(--beauty-border) !important; }
+        .bg-cream { background-color: var(--beauty-nude) !important; }
+
+        /* Banner de boas-vindas */
+        main > section#view-agendar > div:first-child {
+            background: linear-gradient(115deg, #f2eaf8 0%, #fff 48%, #fcecf2 100%) !important;
+            border: 1px solid #efdeea !important;
+            box-shadow: 0 14px 36px rgba(112,72,91,.09);
+            position: relative;
+            overflow: hidden;
+        }
+        main > section#view-agendar > div:first-child:after {
+            content: '✦';
+            position: absolute;
+            right: 7%; top: 12%;
+            color: rgba(201,164,107,.35);
+            font-size: 42px;
+            pointer-events: none;
+            animation: beautyFloat 4s ease-in-out infinite;
+        }
+
+        /* Cartões de serviços e blocos de agendamento */
+        #services-catalog-grid > div {
+            border-color: var(--beauty-border) !important;
+            box-shadow: 0 7px 22px rgba(112,72,91,.055);
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+        }
+        #services-catalog-grid > div:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 30px rgba(169,78,115,.13);
+            border-color: #d9a6bb !important;
+        }
+        #step-datetime, #step-client-info,
+        #view-meus > div.bg-white,
+        #view-admin .bg-white {
+            border-color: var(--beauty-border) !important;
+            box-shadow: 0 9px 28px rgba(112,72,91,.065);
+        }
+
+        /* Botões com movimento discreto */
+        button, a[class*="rounded-"] {
+            transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease;
+        }
+        button:hover:not(:disabled) {
+            filter: saturate(1.06);
+        }
+        button:active:not(:disabled) { transform: scale(.975); }
+        button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+            outline: 3px solid rgba(201,111,145,.28);
+            outline-offset: 2px;
+        }
+        button.bg-gradient-to-r, button[type="submit"] {
+            box-shadow: 0 8px 18px rgba(169,78,115,.20);
+        }
+        button.bg-gradient-to-r:hover, button[type="submit"]:hover {
+            box-shadow: 0 12px 24px rgba(169,78,115,.27);
+            transform: translateY(-1px);
+        }
+
+        /* Campos de preenchimento */
+        input:not([type="checkbox"]):not([type="radio"]), textarea, select {
+            border-color: #ead9e2;
+            transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+        }
+        input:not([type="checkbox"]):not([type="radio"]):focus, textarea:focus, select:focus {
+            border-color: #d28ba7 !important;
+            box-shadow: 0 0 0 4px rgba(201,111,145,.12) !important;
+        }
+
+        /* Barra inferior, resumo flutuante, modais e notificações */
+        #floating-combo-bar {
+            background: linear-gradient(110deg, #493849, #76536f) !important;
+            box-shadow: 0 15px 38px rgba(64,52,66,.25);
+            animation: beautyPageIn .3s ease both;
+        }
+        #success-modal > div, #confirm-modal > div {
+            border: 1px solid var(--beauty-border);
+            box-shadow: 0 24px 70px rgba(64,52,66,.22);
+        }
+        #toast-container > div { animation: beautyPageIn .25s ease both; }
+
+        /* Rolagem mais delicada */
+        ::-webkit-scrollbar-track { background: #fbf5f8; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(#d99bb3, #b98ac0); }
+        ::selection { background: #f4d8e4; color: #493849; }
+
+        /* Respeita quem prefere menos movimento */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col pb-24 md:pb-12">
@@ -1678,3 +1836,95 @@
 
 </body>
 </html>
+
+-----------------------------------------------------------------------------------
+
+{
+  "id": "./index.html",
+  "name": "Estúdio BellaPés & Mãos",
+  "short_name": "BellaPés",
+  "description": "Agendamentos do Estúdio BellaPés & Mãos",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#FAF9F6",
+  "theme_color": "#C88A7E",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
+
+------------------------------------------------
+
+const CACHE_NAME = 'bellapes-pwa-v2';
+const APP_FILES = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll(APP_FILES);
+    await self.skipWaiting();
+  })());
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  const requestURL = new URL(event.request.url);
+  if (requestURL.origin !== self.location.origin) return;
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(event.request);
+        const cache = await caches.open(CACHE_NAME);
+        cache.put('./index.html', response.clone());
+        return response;
+      } catch (error) {
+        return (await caches.match('./index.html')) || Response.error();
+      }
+    })());
+    return;
+  }
+
+  event.respondWith((async () => {
+    const cached = await caches.match(event.request);
+    if (cached) return cached;
+    try {
+      return await fetch(event.request);
+    } catch (error) {
+      return Response.error();
+    }
+  })());
+});
