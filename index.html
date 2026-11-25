@@ -431,9 +431,14 @@
                 <!-- SUB-ABA 2: GERENCIADOR DE SERVIÇOS (CRUD) -->
                 <div id="admin-sub-servicos" class="hidden space-y-5">
                     <div class="bg-white p-5 sm:p-6 rounded-3xl border border-stone-200/80 space-y-4">
-                        <div class="flex items-center justify-between">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
                             <h3 id="service-form-title" class="text-lg font-bold text-graphite">Adicionar Novo Serviço</h3>
-                            <button type="button" id="cancel-edit-service-btn" onclick="resetServiceForm()" class="hidden text-xs text-red-600 font-semibold hover:underline">Cancelar Edição</button>
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="restoreDefaultServices()" class="px-3 py-1.5 rounded-xl bg-terracotta-light text-terracotta-dark hover:bg-terracotta hover:text-white text-xs font-semibold transition-colors flex items-center gap-1.5">
+                                    <i class="fa-solid fa-rotate-left"></i> Restaurar Serviços Padrão
+                                </button>
+                                <button type="button" id="cancel-edit-service-btn" onclick="resetServiceForm()" class="hidden text-xs text-red-600 font-semibold hover:underline">Cancelar Edição</button>
+                            </div>
                         </div>
 
                         <form onsubmit="saveServiceForm(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
@@ -785,7 +790,7 @@
                 },
                 {
                     id: 'srv-2',
-                    name: 'Esmaltação em Gel',
+                    name: 'Esmaltação em Gel (Mãos)',
                     category: 'maos',
                     price: 65.00,
                     duration: 60,
@@ -794,33 +799,60 @@
                 },
                 {
                     id: 'srv-3',
-                    name: 'Alongamento de Unhas',
+                    name: 'Banho de Gel / Blindagem',
                     category: 'maos',
-                    price: 130.00,
-                    duration: 120,
-                    desc: 'Alongamento natural e resistente (fibra de vidro ou gel moldado) com curvatura personalizada.',
+                    price: 80.00,
+                    duration: 75,
+                    desc: 'Camada protetora de gel sobre a unha natural para evitar quebras, descamações e aumentar a resistência.',
                     active: true
                 },
                 {
                     id: 'srv-4',
-                    name: 'Spa das Mãos',
+                    name: 'Alongamento de Unhas (Fibra ou Gel)',
                     category: 'maos',
-                    price: 45.00,
-                    duration: 40,
-                    desc: 'Esfoliação suave, máscara nutritiva de colágeno, massagem relaxante e revitalização.',
+                    price: 130.00,
+                    duration: 120,
+                    desc: 'Alongamento natural e resistente com curvatura personalizada, acabamento fino e cutilagem inclusa.',
                     active: true
                 },
                 {
                     id: 'srv-5',
-                    name: 'Pedicure Tradicional',
-                    category: 'pes',
-                    price: 40.00,
-                    duration: 50,
-                    desc: 'Corte técnico das unhas, cutilagem, lixamento plantar leve e esmaltação.',
+                    name: 'Manutenção de Alongamento',
+                    category: 'maos',
+                    price: 90.00,
+                    duration: 90,
+                    desc: 'Nivelamento, reposição de estrutura, cutilagem e nova esmaltação para manter o alongamento perfeito.',
                     active: true
                 },
                 {
                     id: 'srv-6',
+                    name: 'Spa das Mãos',
+                    category: 'maos',
+                    price: 45.00,
+                    duration: 40,
+                    desc: 'Esfoliação suave, máscara nutritiva de colágeno, massagem relaxante e revitalização da pele.',
+                    active: true
+                },
+                {
+                    id: 'srv-7',
+                    name: 'Pedicure Tradicional',
+                    category: 'pes',
+                    price: 40.00,
+                    duration: 50,
+                    desc: 'Corte técnico das unhas, cutilagem, lixamento plantar leve, hidratação e esmaltação.',
+                    active: true
+                },
+                {
+                    id: 'srv-8',
+                    name: 'Combo Pé & Mão Tradicional',
+                    category: 'pes',
+                    price: 70.00,
+                    duration: 90,
+                    desc: 'Atendimento completo de manicure e pedicure tradicional com cutilagem e esmaltação.',
+                    active: true
+                },
+                {
+                    id: 'srv-9',
                     name: 'Remoção de Calos e Calosidades (Calista)',
                     category: 'pes',
                     price: 85.00,
@@ -829,7 +861,7 @@
                     active: true
                 },
                 {
-                    id: 'srv-7',
+                    id: 'srv-10',
                     name: 'Tratamento de Unhas Encravadas',
                     category: 'pes',
                     price: 95.00,
@@ -838,7 +870,16 @@
                     active: true
                 },
                 {
-                    id: 'srv-8',
+                    id: 'srv-11',
+                    name: 'Plástica dos Pés (Lixamento Profundo)',
+                    category: 'pes',
+                    price: 80.00,
+                    duration: 60,
+                    desc: 'Remoção de células mortas e asperezas dos calcanhares com emoliência profunda e hidratação intensiva.',
+                    active: true
+                },
+                {
+                    id: 'srv-12',
                     name: 'Hidratação Profunda & Spa dos Pés',
                     category: 'pes',
                     price: 70.00,
@@ -855,7 +896,8 @@
             const savedBlocks = localStorage.getItem(STORAGE_KEYS.BLOCKS);
             const savedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
 
-            state.services = savedServices ? JSON.parse(savedServices) : getDefaultServices();
+            const parsedServices = savedServices ? JSON.parse(savedServices) : [];
+            state.services = (Array.isArray(parsedServices) && parsedServices.length > 0) ? parsedServices : getDefaultServices();
             state.appointments = savedAppointments ? JSON.parse(savedAppointments) : [];
             state.blocks = savedBlocks ? JSON.parse(savedBlocks) : [];
             state.settings = savedSettings
@@ -895,8 +937,13 @@
         window.applyRemoteData = function(cloudData) {
             if (!cloudData) return;
             if (Array.isArray(cloudData.services)) {
-                state.services = cloudData.services;
-                localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(state.services));
+                if (cloudData.services.length > 0) {
+                    state.services = cloudData.services;
+                    localStorage.setItem(STORAGE_KEYS.SERVICES, JSON.stringify(state.services));
+                } else {
+                    state.services = getDefaultServices();
+                    saveServicesToStorage(true);
+                }
             }
             if (Array.isArray(cloudData.appointments)) {
                 state.appointments = cloudData.appointments;
@@ -1686,6 +1733,23 @@
                 renderTimeSlots();
                 updateBookingSummary();
                 showToast('Serviço excluído.', 'success');
+            });
+        }
+
+        function restoreDefaultServices() {
+            showConfirm('Restaurar catálogo padrão', 'Isso irá adicionar de volta os 12 serviços padrão de Mãos, Pés e Calista sem apagar seus agendamentos. Continuar?', () => {
+                const existingNames = new Set(state.services.map(s => s.name.toLowerCase()));
+                const defaults = getDefaultServices();
+                defaults.forEach((item, idx) => {
+                    if (!existingNames.has(item.name.toLowerCase())) {
+                        state.services.push({ ...item, id: `srv-${Date.now()}-${idx}` });
+                    }
+                });
+                saveServicesToStorage(true);
+                renderAdminServices();
+                renderCatalog();
+                updateBookingSummary();
+                showToast('Serviços padrão restaurados com sucesso!', 'success');
             });
         }
 
